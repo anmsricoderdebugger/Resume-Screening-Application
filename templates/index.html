@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Talent Architect AI</title>
+    <!-- Link to Separate CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header style="text-align: center; margin-bottom: 30px;">
+            <h1>Strategic Talent Architect</h1>
+            <p style="color: #64748b;">AI-Powered Recruitment & JD Optimization</p>
+        </header>
+
+        <!-- SECTION 1: JD SMART ENHANCER -->
+        <div class="card">
+            <h2>✨ JD Smart Enhancer</h2>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Upload a base JD and provide requirements to create a high-performance version.</p>
+            
+            <div class="upload-section enhancer-upload" style="border: 2px dashed #cbd5e1; padding: 20px; text-align: center; margin-bottom: 15px; border-radius: 8px;">
+                <div class="upload-icon">📄</div>
+                <h3>Upload Base JD</h3>
+                <p>Select PDF, DOCX, or DOC</p>
+                <input type="file" id="jdEnhanceFileInput" accept=".pdf,.docx,.doc">
+            </div>
+
+            <textarea id="recruiterModInput" placeholder="Add Special Requirements (e.g., 'Must have 5 years in FinTech', 'Make the tone more aggressive')..." rows="3"></textarea>
+            
+            <button onclick="runJDEnhancement()" class="primary-btn" style="width: 100%; margin-top: 10px;">🚀 Enhance JD</button>
+        </div>
+
+        <!-- SECTION 2: CV SCREENING -->
+        <!-- SECTION 2: CV SCREENING -->
+            <div class="card" style="margin-top:25px;">
+                <h2>🔍 CV Screening </h2>
+                
+                <div class="screening-upload-grid">
+                    <!-- JD Upload Section -->
+                    <div class="upload-section">
+                        <div class="upload-icon">📄</div>
+                        <h3>Target JD</h3>
+                        <p>The job you are hiring for</p>
+                        <input type="file" id="jdFileInput" accept=".pdf,.docx,.doc">
+                    </div>
+
+                    <!-- CV Upload Section -->
+                    <div class="upload-section">
+                        <div class="upload-icon">👥</div>
+                        <h3>Candidate Resumes</h3>
+                        <p>Upload multiple CVs (PDF/DOC/DOCX)</p>
+                        <input type="file" id="cvFileInput" accept=".pdf,.docx,.doc" multiple>
+                    </div>
+                </div>
+
+                <!-- NEW: Recruiter Notes for Screening -->
+                <div style="margin-top: 20px;">
+                    <label style="font-weight: bold; color: #1e293b; display: block; margin-bottom: 8px;">
+                        📝 Special Instructions for Screening (Optional)
+                    </label>
+                    <textarea id="screeningNotesInput" 
+                        placeholder="e.g. 'Prioritize people with experience in Python', 'Ignore candidates with less than 2 years of experience', 'Focus on local candidates only'..." 
+                        rows="3" 
+                        style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit;"></textarea>
+                </div>
+
+                <button onclick="runScreening()" class="primary-btn" style="margin-top: 25px; width: 100%;">
+                    🚀 Start Strategic Analysis
+                </button>
+            </div>
+            
+        
+
+        <!-- LOADER & RESULTS -->
+        <div id="screeningLoading" class="loader" style="display:none; text-align: center; margin-top: 20px; font-weight: bold;">
+            <div class="spinner"></div> <!-- Ensure you have a spinner in CSS -->
+            <p>Processing Candidates... Please wait.</p>
+        </div>
+        
+        <div id="screeningResults" style="display:none; margin-top: 30px;">
+            <h2 style="border-bottom: 2px solid #2563eb; padding-bottom: 10px; margin-bottom: 20px;">Analysis Results</h2>
+            
+            <!-- NEW: JD Market Intelligence Flag Section (Separate from Cards) -->
+            <div id="jdMarketAuditSection" style="display: none; margin-bottom: 30px;">
+                <div class="jd-flag-card">
+                    <div class="jd-flag-header">
+                        🚩 JD Market Intelligence & Benchmark Gaps
+                    </div>
+                    <div id="jdMarketContent" class="jd-flag-body">
+                        <!-- AI Market insights will be injected here via script.js -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidate Rankings Section -->
+            <div id="resultsContainer"></div>
+
+            <!-- Download Button -->
+            <button id="downloadResultsBtn" onclick="downloadAllResults()" class="primary-btn" 
+                    style="display:none; margin-top: 20px; background: #059669; width: 100%; padding: 15px; font-size: 1.1em;">
+                📥 Download Full Analysis Report (PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL FOR ENHANCED JD -->
+    <div id="jdModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <h2 style="margin: 0; color: #1e293b;">✨ Enhanced Job Description</h2>
+                <button onclick="closeJdModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+
+            <div id="enhancedJdView" class="document-view" style="margin-top: 20px; max-height: 450px; overflow-y: auto; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;">
+                <!-- Result will be injected here -->
+            </div>
+
+            <div class="modal-footer" style="margin-top: 25px; display: flex; gap: 15px; justify-content: flex-end;">
+                <button onclick="downloadEnhancedJD()" class="primary-btn" style="background: #10b981;">📥 Download PDF</button>
+                <button onclick="closeJdModal()" class="primary-btn" style="background: #64748b;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link to Separate JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
