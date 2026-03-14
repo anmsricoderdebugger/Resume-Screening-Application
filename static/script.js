@@ -42,11 +42,13 @@ async function runScreening() {
                     const response = await fetch('/api/screen', { method: 'POST', body: fd });
                     
                     const contentType = response.headers.get("content-type");
+                    console.log("Content-Type:", contentType);
                     let res;
 
                     // Agar server ne JSON bheja hai (chahe error ho ya success)
                     if (contentType && contentType.includes("application/json")) {
                         res = await response.json();
+                        console.log("JSON Response:", res);
                     } else {
                         // Agar waqai koi HTML crash page hai
                         const errorText = await response.text();
@@ -89,7 +91,6 @@ async function runScreening() {
         }
     };
 
-    // Parallel workers
     const workers = [process()]; // Only 1 worker to prevent Auth 503 errors
     await Promise.all(workers);
 

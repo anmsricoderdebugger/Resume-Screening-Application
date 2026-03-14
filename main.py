@@ -89,6 +89,11 @@ def screen_cv():
             RECRUITER OVERRIDES:
             {recruiter_notes if recruiter_notes else "None."}
 
+            CRITICAL FORMATTING RULES:
+            - Every string in every array MUST be a single concise sentence, max 15 words.
+            - Each array MUST have at most 3 items.
+            - Write in plain professional English only.
+
             OUTPUT ONLY VALID JSON:
             {{
                 "candidate_name": "Extract real name from CV here",
@@ -96,12 +101,12 @@ def screen_cv():
                 "recommendation": "Hierarchy Level",
                 "rationale": "One sentence summary.",
                 "strengths": {{
-                    "NIRF_and_Pedigree": [],
-                    "Experience_Alignment": [],
-                    "Projects_and_Quantifiable_Impact": []
+                    "NIRF_and_Pedigree": ["max 2 items, each under 15 words"],
+                    "Experience_Alignment": ["max 2 items, each under 15 words"],
+                    "Projects_and_Quantifiable_Impact": ["max 2 items, each under 15 words"]
                 }},
-                "proximity_matches": [],
-                "gaps": {{ "Functional_Gaps": [], "Domain_Mismatch": [] }},
+                "proximity_matches": ["max 2 items, each under 15 words"],
+                "gaps": {{ "Functional_Gaps": ["max 2 items, each under 15 words"], "Domain_Mismatch": ["max 1 item, under 15 words"] }},
                 "jd_enhancement": {{ "missing_in_jd": [] }}
             }}
 
@@ -132,11 +137,17 @@ def enhance_jd():
         base_jd_text = extract_text_from_file(jd_file)
 
         enhancer_prompt = f"""
-        Rewrite this JD into a high-performance Job Description.
-        Notes: {recruiter_notes}
-        Return JSON format: {{"enhanced_text": "Markdown content"}}
-        
-        BASE JD: {base_jd_text}
+            Rewrite this JD into a high-performance Job Description.
+            Notes: {recruiter_notes}
+    
+            CRITICAL FORMATTING RULE: The output must be plain text only.
+            Do NOT use any markdown syntax — no ## headers, no ** bold **, no * bullets, no --- dividers.
+            Use simple line breaks and paragraph spacing for structure.
+            Use UPPERCASE for section headings instead of markdown.
+    
+            Return JSON format: {{"enhanced_text": "Plain text content here, absolutely no markdown formatting"}}
+            
+            BASE JD: {base_jd_text}
         """
 
         response = model.generate_content(enhancer_prompt)
