@@ -179,28 +179,34 @@ function renderCard(d, container) {
 }
 
 async function downloadAllResults() {
-    // Select the wrapper that includes BOTH the JD Flag and CV Cards
     const element = document.getElementById('screeningResults'); 
     const btn = document.getElementById('downloadResultsBtn');
-
+ 
     btn.innerText = "⌛ Generating Audit PDF...";
     btn.disabled = true;
-
-    // Wait for browser paint
+ 
     await new Promise(r => setTimeout(r, 800));
-
+ 
     const opt = {
-        margin:       [0.4, 0.4],
+        margin:       [0.3, 0.4, 0.3, 0.4],
         filename:     'Candidate_Audit_Report.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            scrollY: 0,
+            windowHeight: element.scrollHeight  // Capture full scrollable height
+        },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        // FIX: Changed from 'avoid-all' to only css mode.
+        // 'avoid-all' was preventing ANY element from being split across pages,
+        // which pushed entire cards to the next page leaving huge blank gaps.
+        // Now cards can flow naturally across page boundaries.
+        pagebreak:    { mode: ['css'], avoid: ['.res-header'] }
     };
-
-    // Temporarily hide the download button from the PDF output
+ 
     btn.style.display = 'none';
-
+ 
     try {
         await html2pdf().set(opt).from(element).save();
     } catch (err) {
@@ -252,21 +258,42 @@ async function runJDEnhancement() {
 
 function closeJdModal() { document.getElementById('jdModal').style.display = 'none'; }
 
-function downloadEnhancedJD() {
+async function downloadEnhancedJD() {
     const element = document.getElementById('enhancedJdView');
     const originalStyle = element.style.cssText;
+ 
+    // Remove ALL height/scroll constraints so html2pdf sees the full content
     element.style.maxHeight = "none";
     element.style.overflow = "visible";
     element.style.height = "auto";
-
+    element.style.position = "relative";
+ 
+    // Force browser reflow so the element fully expands before capture
+    await new Promise(r => setTimeout(r, 500));
+ 
     const opt = {
         margin: 0.5,
         filename: 'Enhanced_JD.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            // KEY FIX: Tell html2canvas to use the element's full scroll height,
+            // not just the visible viewport. Without this, content gets clipped.
+            height: element.scrollHeight,
+            windowHeight: element.scrollHeight
+        },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css'] }
+        pagebreak: { mode: ['css'] }
     };
-
-    html2pdf().set(opt).from(element).save().then(() => {
+ 
+    try {
+        await html2pdf().set(opt).from(element).save();
+    } catch (err) {
+        alert("PDF Error: " + err.message);
+    } finally {
+        // Restore original styling
         element.style.cssText = originalStyle;
-    });
+    }
 }
