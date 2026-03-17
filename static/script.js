@@ -230,6 +230,12 @@ async function runJDEnhancement() {
         return;
     }
 
+    if (!notesText.trim()) {
+        alert("Please add special requirements or instructions for JD enhancement.");
+        document.getElementById('recruiterModInput').focus();
+        return;
+    }
+    
     const btn = document.querySelector("button[onclick='runJDEnhancement()']");
     btn.innerText = "Processing... Please wait...";
     btn.disabled = true;
