@@ -10,6 +10,19 @@ async function runScreening() {
     // NEW: Get recruiter notes for screening
     const screeningNotes = document.getElementById('screeningNotesInput') ? document.getElementById('screeningNotesInput').value : "";
 
+    const blockedExts = ['.xlsx', '.xls', '.csv', '.tsv'];
+
+    if (jdFile && blockedExts.some(ext => jdFile.name.toLowerCase().endsWith(ext))) {
+        alert("JD must be a PDF, DOC, or DOCX file. Excel/CSV files are not supported.");
+        return;
+    }
+
+    const invalidCVs = cvFiles.filter(f => blockedExts.some(ext => f.name.toLowerCase().endsWith(ext)));
+    if (invalidCVs.length > 0) {
+        alert(`These files are not supported: ${invalidCVs.map(f => f.name).join(', ')}\n\nPlease upload PDF, DOC, or DOCX files only.`);
+        return;
+    }
+
     if (!jdFile || cvFiles.length === 0) {
         alert("Please upload a JD and CVs.");
         return;
@@ -70,7 +83,13 @@ async function runScreening() {
                     }
                 } catch(e) {
                     attempts++;
-                    console.error(`Attempt ${attempts} failed:`, e.message);                    
+                    console.error(`Attempt ${attempts} failed:`, e.message);     
+                    // Show clear alert for document-level errors (blank/image files)
+                    if (e.message.includes('blank document') || e.message.includes('only images')) {
+                        alert(`⚠️ ${file.name}: ${e.message}`);
+                        break;
+                    }
+                                   
                     if (attempts >= 2) {
                         // Failed card
                         const errorData = {

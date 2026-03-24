@@ -290,10 +290,31 @@ def screen_cv():
         jd_text = extract_text_from_file(jd_file) if jd_file else "Not provided"
         cv_text = extract_text_from_file(cv_file)
 
-        if not cv_text or len(cv_text.strip()) < 50:
+        # Check for blank/empty document
+        if not cv_text or len(cv_text.strip()) == 0:
             return jsonify({
                 "success": False, 
-                "error": f"Could not extract text from '{cv_file.filename}'. File may be image-based or password-protected."
+                "error": f"'{cv_file.filename}' appears to be a blank document with no content."
+            }), 400
+
+        # Check for image-only document (very little extractable text = likely scanned/image PDF)
+        if len(cv_text.strip()) < 50:
+            return jsonify({
+                "success": False, 
+                "error": f"'{cv_file.filename}' appears to contain only images. Please upload a text-based document."
+            }), 400
+
+        # Same check for JD
+        if jd_file and (not jd_text or len(jd_text.strip()) == 0):
+            return jsonify({
+                "success": False, 
+                "error": f"'{jd_file.filename}' appears to be a blank document with no content."
+            }), 400
+
+        if jd_file and len(jd_text.strip()) < 50:
+            return jsonify({
+                "success": False, 
+                "error": f"'{jd_file.filename}' appears to contain only images. Please upload a text-based JD."
             }), 400
 
         jd_text = jd_text[:MAX_JD_CHARS]
